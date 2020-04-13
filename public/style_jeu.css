@@ -1,0 +1,65 @@
+
+h1{
+  margin-right:auto;
+  padding: 40px 20px 5px; 
+  text-align:center;
+  display: inline-block;
+  color: white;
+  font: 1.65em Bowlby One SC, Georgia, Arial;
+  z-index: 50;
+  animation:colorchange 20s infinite alternate;
+}
+
+#Info{
+  float: left;
+  margin-left:20%;
+  margin-top: 10%; 
+  vertical-align:
+}
+
+#Info tr{
+  list-style: none;
+  width:5%;
+	padding: 30px 20px 15px;
+  color: white;
+  font: 1.4em Bebas Neue, Arial;
+}
+
+#player{
+  
+}
+#time{
+  
+}
+body{
+  position: relative;
+  background-color: black;
+}
+#grille{
+  margin-left:30%;
+  border-collapse: collapse    
+}
+
+#grille td{
+  border: 1.5px solid white;
+  padding: 12px;
+  
+}
+
+@-webkit-keyframes colorchange {
+        0% { color: red; }
+        50% { color: yellow; }
+        100% { color: blue; }
+}
+
+/* Bas de page */
+#footer{
+  font-family: helvetica, arial, sans-serif;
+  background: #636363;
+  align: auto;
+}
+
+#footer h2{
+  color: white;
+  text-align: center;
+}

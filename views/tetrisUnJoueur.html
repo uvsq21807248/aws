@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Tetris un joueur</title>
+        <!-- import page web pour le style css -->
+        <link rel="stylesheet" href="/style_jeu.css">  
+        <link href="https://fonts.googleapis.com/css?family=Bowlby+One+SC&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap" rel="stylesheet"> 
+    </head>
+ 
+    <body>
+      <div>
+        <h1>Tetris Battle!</h1>
+      <!-- information sur le joueur -->
+      <table id = "Info">
+       <!-- nom du joueur -->
+       <tr>
+         <td>Player: </td> 
+        <script>document.write('<td>'+ sessionStorage.username+ ' </td>');</script>
+        </tr>
+        <tr>
+          <td>Time:</td>
+          <td><span id="Time">0:00:00</span></td>
+          <!--chrono start -->
+        </tr>
+      </table>
+      <!-- génération de la grille de jeu -->
+     <script>
+        document.write("<table id = 'grille' border= '1'>");
+        var i, j;
+        for (i=0;i<20; i++)
+        {
+          document.write("<tr>");
+          for (j=0;j<10;j++)
+            {
+              document.write("<td id = 'test'></td>");
+              document.getElementById("test").id = i+","+j;
+            }
+          
+          document.write("</tr>");
+        }
+        document.write("</table>");
+      </script>
+
+      <!-- interaction via boutons (méthode onclock)-->
+      <p><input type="button" value="bas" onclick="cmd('bas')" /></p>
+       <p><input type="button" value="gauche" onclick="cmd('gauche')" /></p>
+       <p><input type="button" value="droite" onclick="cmd('droite')" /></p>
+      <p><input type="button" value="rotate" onclick="cmd('rotate')" /></p>
+      <!-- interaction via clavier-->
+      <script>
+         document.addEventListener("keydown", function(e){
+          if(e.keyCode === 37){
+              cmd('droite');
+          }
+          else if(e.keyCode == 38){
+               cmd('rotate');
+          }
+          else if(e.keyCode == 39){
+               cmd('gauche');
+          }
+          else if(e.keyCode == 40){
+               cmd('bas');
+          }
+          else if(e.keyCode == 27){
+               location.replace("jeu.html");
+          }
+        });
+      </script>
+      
+      <!--comunication avec le serveur via websocket-->
+      <script src="/socket.io/socket.io.js"></script>
+        <script>
+           
+            var socket = io.connect('wss://' + window.location.host);
+          //console.log("log")
+            socket.emit('OnePlayer',socket.id);
+          //console.log("pulse")
+           
+            var x = 0;
+            var y = 0;
+            var x2 = 1;
+            var y2 = 0;
+            var x3 = 2;
+            var y3 = 0;
+            var x4 = 3;
+            var y4 = 0;
+            var CMDsend;
+          
+           socket.on('moove', function(message) 
+            {
+               val = message.split(' ');
+               //console.log("--------",y+","+x);
+               document.getElementById(y+","+x).style.backgroundColor = "black"
+               document.getElementById(y2+","+x2).style.backgroundColor = "black"
+               document.getElementById(y3+","+x3).style.backgroundColor = "black"
+               document.getElementById(y4+","+x4).style.backgroundColor = "black"
+               x = Number(val[0]);
+               y = Number(val[1]);
+               x2 = Number(val[2]);
+               y2 = Number(val[3]);
+               x3 = Number(val[4]);
+               y3 = Number(val[5]);
+               x4 = Number(val[6]);
+               y4 = Number(val[7]);
+               //console.log(x,y,x2,y2);
+               document.getElementById(y+","+x).style.backgroundColor = "red";
+               document.getElementById(y2+","+x2).style.backgroundColor = "red";
+               document.getElementById(y3+","+x3).style.backgroundColor = "red";
+               document.getElementById(y4+","+x4).style.backgroundColor = "red";
+            })
+          
+          
+            socket.on('lock', function(message) 
+            {
+              //console.log("lock");
+              document.getElementById(y+","+x).style.backgroundColor = "blue";
+              document.getElementById(y2+","+x2).style.backgroundColor = "blue";
+              document.getElementById(y3+","+x3).style.backgroundColor = "blue";
+              document.getElementById(y4+","+x4).style.backgroundColor = "blue";
+              //console.log("lock",x,y,x2,y2,x3,y3,x4,y4)
+              x = 0;
+              y = 0;
+              x2 = 0;
+              y2 = 0;
+             x3 = 0;
+             y3 = 0;
+             x4 = 0;
+             y4 = 0;
+            })
+          
+            
+          
+            socket.on('supp', function(message)
+            {
+              //console.log("supp",message);
+              for(var p=1;p<message[0]+1;p++)
+              {  
+                x = message[p];
+                //console.log("eff " +x+message[1]);
+              for(var i=9; i>=0; i--)
+              {
+               for(var j=x; j>=0; j--)
+               {
+                 if(j != 0)
+                 {
+                    document.getElementById(j+","+i).style.backgroundColor = document.getElementById(j-1+","+i).style.backgroundColor;    
+                 }
+                 else
+                 {
+                   document.getElementById(j+","+i).style.backgroundColor = "black"
+                 }
+               } 
+              }
+              }
+              x = 0;
+              y = 0;
+              x2 = 0;
+              y2 = 0;
+              x3 = 0;
+              y3 = 0;
+              x4 = 0;
+              y4 = 0;
+            })
+            
+        
+            var clock = setInterval(sendCmd,100);
+            
+            function sendCmd()
+            {
+              if(CMDsend != null)
+              {
+                socket.emit('cmd',CMDsend)  
+              }
+              CMDsend = null;
+            }
+          
+            socket.on('GameOver',function(message)
+            {
+              document.write("game Over");
+              clearInterval(clock)
+              socket.disconnect()
+            });
+  
+            function cmd(dir)
+            {
+              CMDsend = dir;
+            }
+            
+        </script>
+      </div>
+       <!-- Bas de page -->
+      <div id = "footer">
+        <h2>
+          Site réalisé pour le projet AWS UVSQ 2020
+        </h2>
+      </div>
+    </body>
+</html>
